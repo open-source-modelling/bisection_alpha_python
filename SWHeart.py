@@ -1,6 +1,6 @@
 def SWHeart(u, v, alpha):
 # SWHEART Calculate the heart of the Wilson function.
-# H = SWHeart(u, v, alpha) calculates the matrix H (Heart of the Wilson
+# SWHeart(u, v, alpha) calculates the matrix H (Heart of the Wilson
 # function) for maturities specified by vectors u and v. The formula is
 # taken from the EIOPA technical specifications paragraph 132.
 #
