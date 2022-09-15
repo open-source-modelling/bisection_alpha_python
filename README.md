@@ -7,7 +7,7 @@
 
 This repository has an implementation for a simple bisection method that finds the optimal parameter α for the Smith & Wilson algorithm often used in insurance to interpolate/extrapolate rates or yields.
 
-The implementation is based on [Technical documentation of the Methodology to derive EIOPA's risk-free interest rate term structure](https://www.eiopa.europa.eu/sites/default/files/risk_free_interest_rate/12092019-technical_documentation.pdf) and [Wiki on Bisection method](https://en.wikipedia.org/wiki/Bisection_method)
+The implementation is based on [Technical documentation of the Methodology to derive EIOPA's risk-free interest rate term structure](https://www.eiopa.europa.eu/sites/default/files/risk_free_interest_rate/12092019-technical_documentation.pdf) and [Wiki on Bisection method](https://en.wikipedia.org/wiki/Bisection_method).
 
 ## Problem
 Before using the Smith & Wilson algorithm, the user needs to provide the convergence speed parameter α. This parameter needs to be calibrated primarily so that that the extrapolated result matches the desired long-term behaviour.
