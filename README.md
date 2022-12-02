@@ -28,7 +28,7 @@ By transforming the minimization problem at the point of convergence into a prob
 ### Output
   - Optimal value of the parameter α (if the bisection method converged).
  
- Note that to be consistent with EIOPA's recommandations, the lower bound of the interval should be set to 0.05. 
+ Note that to be consistent with EIOPA's recommendations, the lower bound of the interval should be set to 0.05. 
  
 ## Getting started
 ```python
@@ -57,4 +57,3 @@ print("Example in the documentation for Galfa: "+ str(Galfa(M_Obs, r_Obs, ufr, 0
 print("Example in the documentation for BisectionAlpha: "+ str(BisectionAlpha(0.05, 0.5, M_Obs, r_Obs, ufr, Tau, Precision, 1000)))
 ```
 Note that this implementation use functions `SWCalibrate` and `SWExtrapolate` from the [Smith & Wilson implementation](https://github.com/qnity/insurance_python/tree/main/smith%26wilson). They are duplicated to this repository for completeness. If there are any inconsistencies or suggestions, raise an issue or contact us directly.
-
