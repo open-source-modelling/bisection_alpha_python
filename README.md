@@ -1,13 +1,12 @@
 <h1 align="center" style="border-botom: none">
   <b>
-    🐍 Bisection for Smith-Wilson parameter 🐍     
+    🐍 Bisection method that finds the optimal parameter α for the Smith & Wilson algorithm 🐍     
   </b>
 </h1>
 
-
 This repository has an implementation for a simple bisection method that finds the optimal parameter α for the Smith & Wilson algorithm often used in insurance to interpolate/extrapolate rates or yields.
 
-The implementation is based on [Technical documentation of the Methodology to derive EIOPA's risk-free interest rate term structure](https://www.eiopa.europa.eu/document/download/df541a50-a9e7-458b-86ae-6ad16c2d6a29_en?filename=16-09-2022%20Technical%20documentation) and [Wiki on Bisection method](https://en.wikipedia.org/wiki/Bisection_method).
+The implementation is based on [Technical documentation of the Methodology to derive EIOPA's risk-free interest rate term structure](https://www.eiopa.europa.eu/document/download/df541a50-a9e7-458b-86ae-6ad16c2d6a29_en?filename=16-09-2022%20Technical%20documentation) and [Wiki on Bisection method](https://en.wikipedia.org/wiki/Bisection_method)
 
 ## Problem
 Before using the Smith & Wilson algorithm, the user needs to provide the convergence speed parameter α. This parameter needs to be calibrated primarily so that that the extrapolated result matches the desired long-term behaviour.
@@ -46,6 +45,7 @@ r_Obs = np.transpose(np.array([0.01, 0.02, 0.03, 0.032, 0.035, 0.04]))
 
 # Ultimate forward rate
 ufr = 0.04
+
 # Numeric precision of the optimisation
 Precision = 0.0000000001
 
@@ -56,4 +56,5 @@ Tau = 0.0001 # 1 basis point
 print("Example in the documentation for Galfa: "+ str(Galfa(M_Obs, r_Obs, ufr, 0.15, Tau)))
 print("Example in the documentation for BisectionAlpha: "+ str(BisectionAlpha(0.05, 0.5, M_Obs, r_Obs, ufr, Tau, Precision, 1000)))
 ```
-Note that this implementation use functions `SWCalibrate` and `SWExtrapolate` from the [Smith & Wilson implementation](https://github.com/qnity/insurance_python/tree/main/smith%26wilson). They are duplicated to this repository for completeness. If there are any inconsistencies or suggestions, raise an issue or contact us directly.
+Note that this implementation use functions `SWCalibrate` and `SWExtrapolate` from the [Smith & Wilson implementation](https://github.com/open-source-modelling/insurance_python/tree/main/smith_wilson). They are duplicated to this repository for completeness. If there are any inconsistencies or suggestions, raise an issue or contact us directly.
+
