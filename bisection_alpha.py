@@ -4,33 +4,38 @@ from SWExtrapolate import SWExtrapolate as SWExtrapolate
 
 def Galfa(M_Obs: np.ndarray, r_Obs: np.ndarray, ufr: float, alpha: float, Tau: float)->float:
     """
-    Calculates the gap at the convergence point between the allowable tolerance Tau and the curve extrapolated using the Smith-Wilson algorithm.
-    interpolation and extrapolation of rates.
-    
+    Calculates the convergence gap of the Smith-Wilson curve minus the tolerance Tau.
+
+    The convergence gap g(alpha) is the distance at the convergence point between the forward rate of the curve extrapolated
+    with the Smith-Wilson algorithm and the ufr, both continuously compounded (paragraph 160). The convergence point is
+    max(U + 40, 60) years, where U is the longest observed maturity (paragraphs 122 and 159).
+    The function returns g(alpha) - Tau; BisectionAlpha finds the alpha at which it is zero.
+
     Args:
-        M_Obs = 1-dimensional ndarray of n maturities of bonds, that have rates provided in input (r). Ex. M_Obs = np.array([1, 3])
+        M_Obs = 1-dimensional ndarray of n maturities of bonds, that have rates provided in input (r_Obs). Ex. M_Obs = np.array([1, 3])
         r_Obs = 1-dimensional ndarray of n rates, for which you wish to calibrate the algorithm. Each rate belongs to an observable Zero-Coupon Bond with a known maturity. Ex. r_Obs = np.array([0.0024, 0.0034])
         ufr =   1 x 1 floating number, representing the ultimate forward rate. Ex. ufr = 0.042
         alpha = 1 x 1 floating number representing the convergence speed parameter alpha. Ex. alpha = 0.05
-        Tau =   1 x 1 floating number representing the allowed difference between ufr and actual curve. Ex. Tau = 0.00001
-    
+        Tau =   1 x 1 floating number representing the allowed gap between the forward rate at the convergence point and the ufr. Ex. Tau = 0.0001 (1 basis point, as used by EIOPA)
+
     Returns:
-        1 x 1 floating number representing the distance between ufr input and the maximum allowed discrepancy Tau 
+        1 x 1 floating number g(alpha) - Tau. A value of zero or below means that alpha meets the tolerance Tau;
+        a positive value means that it does not.
 
     Example of use:
         >>> import numpy as np
-        >>> from SWCalibrate import SWCalibrate as SWCalibrate
-        >>> from SWExtrapolate import SWExtrapolate as SWExtrapolate
+        >>> from bisection_alpha import Galfa as Galfa
         >>> M_Obs = np.transpose(np.array([1, 2, 4, 5, 6, 7]))
         >>> r_Obs =  np.transpose(np.array([0.01, 0.02, 0.03, 0.032, 0.035, 0.04]))
         >>> alfa = 0.15
         >>> ufr = 0.04
-        >>> Precision = 0.0000000001
         >>> Tau = 0.0001
         >>> Galfa(M_Obs, r_Obs, ufr, alfa, Tau)
-        [Out] -8.544212205612438e-05
+        [Out] -8.544212205612415e-05
+        The last digits can differ slightly between computers. The gap is 0.0001 - 0.0000854 = 0.0000146 (0.15 basis points),
+        so alpha = 0.15 meets the tolerance of 1 basis point.
 
-    For more information see https://www.eiopa.europa.eu/sites/default/files/risk_free_interest_rate/12092019-technical_documentation.pdf
+    For more information see https://www.eiopa.europa.eu/document/download/df541a50-a9e7-458b-86ae-6ad16c2d6a29_en?filename=16-09-2022%20Technical%20documentation
     
     Implemented by Gregor Fabjan from Qnity Consultants on 17/12/2021.
     """
@@ -38,13 +43,13 @@ def Galfa(M_Obs: np.ndarray, r_Obs: np.ndarray, ufr: float, alpha: float, Tau: f
     M_Obs = np.ravel(M_Obs)                       # Accept column vectors as well as 1-dimensional arrays
     r_Obs = np.ravel(r_Obs)
     U = max(M_Obs)                                # Find maximum liquid maturity from input
-    T = max(U + 40, 60)                             # Define the convergence point as defined in paragraph 120 and again in 157
-    C = np.identity(M_Obs.size)                   # Construct cash flow matrix described in paragraph 137 assuming the input is ZCB bonds with notional value of 1
-    d = np.exp(-np.log(1 + ufr) * M_Obs)            # Calculate vector d described in paragraph 138
-    Q = np.diag(d) @ C                            # Matrix Q described in paragraph 139
-    b = SWCalibrate(r_Obs, M_Obs, ufr, alpha)     # Calculate the calibration vector b using the equation from paragraph 149
-    K = (1+alpha * M_Obs @ Q@ b) / (np.sinh(alpha * M_Obs.transpose())@ Q@ b) # Calculate kappa as defined in the paragraph 155
-    return( alpha/np.abs(1 - K*np.exp(alpha*T))-Tau) # Size of the gap at the convergence point between the allowable tolerance Tau and the actual curve. Defined in paragraph 158
+    T = max(U + 40, 60)                             # Define the convergence point as defined in paragraph 122 and again in 159
+    C = np.identity(M_Obs.size)                   # Construct cash flow matrix described in paragraph 139 assuming the input is ZCB bonds with notional value of 1
+    d = np.exp(-np.log(1 + ufr) * M_Obs)            # Calculate vector d described in paragraph 140
+    Q = np.diag(d) @ C                            # Matrix Q described in paragraph 141
+    b = SWCalibrate(r_Obs, M_Obs, ufr, alpha)     # Calculate the calibration vector b using the equation from paragraph 151
+    K = (1+alpha * M_Obs @ Q@ b) / (np.sinh(alpha * M_Obs.transpose())@ Q@ b) # Calculate kappa as defined in the paragraph 157
+    return( alpha/np.abs(1 - K*np.exp(alpha*T))-Tau) # Gap g(alpha) at the convergence point from paragraph 160, minus the tolerance Tau
 
 def BisectionAlpha(xStart: float, xEnd: float, M_Obs: np.ndarray, r_Obs: np.ndarray, ufr: float, Tau: float, Precision: float, maxIter: int)->float:
     """
@@ -83,7 +88,7 @@ def BisectionAlpha(xStart: float, xEnd: float, M_Obs: np.ndarray, r_Obs: np.ndar
         >>> BisectionAlpha(xStart, xEnd, M_Obs, r_Obs, ufr, Tau, Precision, maxIter)
         [Out] 0.11549789285636511
 
-    For more information see https://www.eiopa.europa.eu/sites/default/files/risk_free_interest_rate/12092019-technical_documentation.pdf and https://en.wikipedia.org/wiki/Bisection_method
+    For more information see https://www.eiopa.europa.eu/document/download/df541a50-a9e7-458b-86ae-6ad16c2d6a29_en?filename=16-09-2022%20Technical%20documentation and https://en.wikipedia.org/wiki/Bisection_method
      
     Implemented by Gregor Fabjan from Qnity Consultants on 17/12/2021.
     """   
@@ -96,7 +101,7 @@ def BisectionAlpha(xStart: float, xEnd: float, M_Obs: np.ndarray, r_Obs: np.ndar
         return xEnd # If final point already satisfies the conditions return end point
     if np.sign(yStart) == np.sign(yEnd): # The interval does not bracket a root
         if yStart < 0:
-            return xStart # The curve is already within Tau of the ufr at the lowest allowed alpha. EIOPA uses the lowest alpha (at least 0.05) that meets the tolerance
+            return xStart # The curve is already within Tau of the ufr at the lowest allowed alpha. EIOPA uses the lowest alpha (at least 0.05) that meets the tolerance (paragraphs 123 and 161)
         raise ValueError("The gap to the ufr is larger than Tau for every alpha in [xStart, xEnd]; increase xEnd")
     iIter = 0
     while iIter <= maxIter:
